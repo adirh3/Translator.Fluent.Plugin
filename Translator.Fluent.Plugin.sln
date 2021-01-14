@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Translator.Fluent.Plugin", "Translator.Fluent.Plugin\Translator.Fluent.Plugin.csproj", "{111DF748-2A2E-46FF-829C-38D95634C9D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Translator.Fluent.Console", "Translator.Fluent.Console\Translator.Fluent.Console.csproj", "{A867C7EA-4E71-4204-A02E-1F2586C37BEC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{111DF748-2A2E-46FF-829C-38D95634C9D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{111DF748-2A2E-46FF-829C-38D95634C9D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{111DF748-2A2E-46FF-829C-38D95634C9D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A867C7EA-4E71-4204-A02E-1F2586C37BEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A867C7EA-4E71-4204-A02E-1F2586C37BEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A867C7EA-4E71-4204-A02E-1F2586C37BEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A867C7EA-4E71-4204-A02E-1F2586C37BEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
