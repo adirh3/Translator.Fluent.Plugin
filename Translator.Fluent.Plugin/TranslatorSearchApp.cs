@@ -44,9 +44,10 @@ namespace Translator.Fluent.Plugin
             _applicationInfo = new SearchApplicationInfo(SearchAppName,
                 "This apps translates detected languages to target languages", _supportedOperations)
             {
-                MinimumSearchLength = 1,
+                MinimumSearchLength = 3,
                 IsProcessSearchEnabled = false,
                 IsProcessSearchOffline = false,
+                SearchTagOnly = true,
                 ApplicationIconGlyph = DictionaryIconGlyph,
                 SearchAllTime = ApplicationSearchTime.Fast,
                 DefaultSearchTags = new List<SearchTag>()
