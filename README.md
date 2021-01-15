@@ -2,7 +2,7 @@
 
 ![alt text](translator_image.jpg "Title")
 
-This repo is for a [Fluent Search](https://fluentsearch.net) plugin for translting text.
+This repo is for a [Fluent Search](https://fluentsearch.net) plugin for translating text.
 This search application uses Azure Translator to auto detect input language and translate to the target language.
 
 # Usage
