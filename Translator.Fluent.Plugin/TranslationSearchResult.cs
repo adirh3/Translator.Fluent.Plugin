@@ -7,8 +7,9 @@ namespace Translator.Fluent.Plugin
     public class TranslationSearchResult : SearchResultBase
     {
         public TranslationSearchResult(string searchedText, Translation translation, string iconGlyph,
-            IList<ISearchOperation> supportedOperations) : base(translation.Text, searchedText, translation.To, 1, supportedOperations,
-            new List<SearchTag> {new() {Name = translation.To}})
+            IList<ISearchOperation> supportedOperations, List<SearchTag> searchTags) : base(translation.Text,
+            searchedText, translation.To, 1,
+            supportedOperations, searchTags)
         {
             UseIconGlyph = true;
             IconGlyph = iconGlyph;

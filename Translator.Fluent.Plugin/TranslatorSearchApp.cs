@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Blast.API.Search;
 using Blast.API.Search.SearchOperations;
 using Blast.Core;
 using Blast.Core.Interfaces;
@@ -23,13 +24,16 @@ namespace Translator.Fluent.Plugin
         private const string SubscriptionKey = "";
         private const string Endpoint = "https://api.cognitive.microsofttranslator.com/";
         private const string SearchAppName = "Translator";
-        private const string DictionaryIconGlyph = "\uE82D";
+        private const string DictionaryIconGlyph = "\uF2B7";
+        private const string TranslatorSearchTag = "translator";
         private readonly SearchApplicationInfo _applicationInfo;
-        private readonly List<ISearchOperation> _supportedOperations;
+        private readonly List<ISearchOperation> _translateOperations;
+        private readonly List<ISearchOperation> _languageOperations;
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonSerializerOptions = new() {PropertyNameCaseInsensitive = true};
 
-        private Dictionary<string, string> _supportedLanguages;
+        private readonly Dictionary<string, string> _supportedLanguages = new();
+        private readonly Dictionary<string, string> _supportedLanguagesReversed = new();
 
 
         public TranslatorSearchApp()
@@ -37,14 +41,20 @@ namespace Translator.Fluent.Plugin
             _httpClient = new HttpClient();
             // For icon glyphs look at https://docs.microsoft.com/en-us/windows/uwp/design/style/segoe-ui-symbol-font
 
-            _supportedOperations = new List<ISearchOperation>
+            var copySearchOperation = new CopySearchOperation();
+            var translateSearchOperation = new TranslateSearchOperation();
+            _translateOperations = new List<ISearchOperation>
             {
-                new CopySearchOperation()
+                copySearchOperation
+            };
+            _languageOperations = new List<ISearchOperation>
+            {
+                translateSearchOperation
             };
             _applicationInfo = new SearchApplicationInfo(SearchAppName,
-                "This apps translates detected languages to target languages", _supportedOperations)
+                "Translate search to selected language",
+                new SearchOperationBase[] {copySearchOperation, translateSearchOperation})
             {
-                MinimumSearchLength = 3,
                 IsProcessSearchEnabled = false,
                 IsProcessSearchOffline = false,
                 SearchTagOnly = true,
@@ -57,11 +67,20 @@ namespace Translator.Fluent.Plugin
         public async ValueTask LoadSearchApplicationAsync()
         {
             // This is used if you need to load anything asynchronously on Fluent Search startup
-            _supportedLanguages = (await _httpClient.GetFromJsonAsync<LanguagesResult>(
-                                      "https://api.cognitive.microsofttranslator.com/languages?api-version=3.0&scope=translation",
-                                      _jsonSerializerOptions))
-                                  ?.Translation.ToDictionary(pair => pair.Value.Name.ToLower(), pair => pair.Key) ??
-                                  new Dictionary<string, string>();
+            Dictionary<string, Language> dictionaryResult = (await _httpClient.GetFromJsonAsync<LanguagesResult>(
+                "https://api.cognitive.microsofttranslator.com/languages?api-version=3.0&scope=translation",
+                _jsonSerializerOptions))?.Translation;
+            if (dictionaryResult is null)
+                return;
+
+            foreach (var (key, value) in dictionaryResult)
+            {
+                string languageName = value.Name.ToLower();
+                _supportedLanguages[languageName] = key;
+                _supportedLanguagesReversed[key] = languageName;
+            }
+
+
             _applicationInfo.DefaultSearchTags = _supportedLanguages.Keys.Select(l => new SearchTag
             {
                 Name = l,
@@ -82,7 +101,28 @@ namespace Translator.Fluent.Plugin
             string searchedTag = searchRequest.SearchedTag;
             string searchedText = searchRequest.SearchedText;
 
-            if (!_supportedLanguages.TryGetValue(searchedTag, out var toLanguage))
+            string toLanguage = null;
+            if (!searchedTag.Equals(TranslatorSearchTag) &&
+                !_supportedLanguages.TryGetValue(searchedTag, out toLanguage))
+                yield break;
+
+            // This means that the user searched for translator tag
+            if (toLanguage == null)
+            {
+                // If the search is empty return all results
+                bool searchAll = string.IsNullOrWhiteSpace(searchedText);
+                foreach (string language in _supportedLanguages.Keys)
+                {
+                    if (searchAll || language.SearchBlind(searchedText))
+                        yield return new LanguageSearchResult(searchedText, language, DictionaryIconGlyph,
+                            _languageOperations);
+                }
+
+                yield break;
+            }
+
+            // We don't want to send 2 letter translations
+            if (searchedText.Length < 2)
                 yield break;
 
             // Output languages are defined as parameters, input language detected.
@@ -114,10 +154,32 @@ namespace Translator.Fluent.Plugin
 
             foreach (TranslationResult translationResult in translationResults)
             {
+                string detectedLanguage = translationResult.DetectedLanguage?.Language ?? string.Empty;
                 foreach (Translation translation in translationResult.Translations)
                 {
+                    var tags = new List<SearchTag>
+                    {
+                        new()
+                        {
+                            Name = translation.To,
+                            Value = searchedTag,
+                            IconGlyph = DictionaryIconGlyph
+                        }
+                    };
+
+                    if (detectedLanguage != toLanguage &&
+                        _supportedLanguagesReversed.TryGetValue(detectedLanguage, out var languageName))
+                    {
+                        tags.Add(new()
+                        {
+                            Name = detectedLanguage,
+                            Value = languageName,
+                            IconGlyph = DictionaryIconGlyph
+                        });
+                    }
+
                     yield return new TranslationSearchResult(searchedText, translation, DictionaryIconGlyph,
-                        _supportedOperations);
+                        _translateOperations, tags);
                 }
             }
         }
@@ -131,6 +193,20 @@ namespace Translator.Fluent.Plugin
 
         public ValueTask<IHandleResult> HandleSearchResult(ISearchResult searchResult)
         {
+            Type type = searchResult.GetType();
+
+            if (type == typeof(LanguageSearchResult))
+            {
+                // This will cause Fluent Search to search again using the selected language
+                SearchTag searchTag = searchResult.Tags.FirstOrDefault();
+                return new ValueTask<IHandleResult>(new HandleResult(true, true)
+                {
+                    SearchRequest = new SearchRequest(string.Empty, searchTag?.Name, SearchType.SearchAll),
+                    SearchTag = searchTag
+                });
+            }
+
+            // Type is TranslateSearchResult
             Clipboard.SetText(searchResult.ResultName);
             return new ValueTask<IHandleResult>(new HandleResult(true, false));
         }
