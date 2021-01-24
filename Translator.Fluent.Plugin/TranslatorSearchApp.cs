@@ -34,6 +34,7 @@ namespace Translator.Fluent.Plugin
 
         private readonly Dictionary<string, string> _supportedLanguages = new();
         private readonly Dictionary<string, string> _supportedLanguagesReversed = new();
+        private readonly CopySearchOperation _copyLatinSearchOperation;
 
 
         public TranslatorSearchApp()
@@ -42,10 +43,12 @@ namespace Translator.Fluent.Plugin
             // For icon glyphs look at https://docs.microsoft.com/en-us/windows/uwp/design/style/segoe-ui-symbol-font
 
             var copySearchOperation = new CopySearchOperation();
+            _copyLatinSearchOperation = new CopySearchOperation("Copy Latin text");
             var translateSearchOperation = new TranslateSearchOperation();
             _translateOperations = new List<ISearchOperation>
             {
-                copySearchOperation
+                copySearchOperation,
+                _copyLatinSearchOperation
             };
             _languageOperations = new List<ISearchOperation>
             {
@@ -207,7 +210,10 @@ namespace Translator.Fluent.Plugin
             }
 
             // Type is TranslateSearchResult
-            Clipboard.SetText(searchResult.ResultName);
+            string textToCopy = searchResult.ResultName;
+            if (searchResult.SelectedOperation == _copyLatinSearchOperation)
+                textToCopy = ((TranslationSearchResult) searchResult).LatinTranslationText;
+            Clipboard.SetText(textToCopy);
             return new ValueTask<IHandleResult>(new HandleResult(true, false));
         }
     }

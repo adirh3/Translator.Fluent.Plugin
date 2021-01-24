@@ -16,9 +16,12 @@ namespace Translator.Fluent.Plugin
             IconGlyph = iconGlyph;
             if (!string.IsNullOrWhiteSpace(translation.Transliteration?.Text))
             {
+                LatinTranslationText = translation.Transliteration.Text;
                 InformationElements = new List<InformationElement> {new("Latin", translation.Transliteration.Text)};
             }
         }
+
+        internal string LatinTranslationText { get; set; }
 
         protected override void OnSelectedSearchResultChanged()
         {
