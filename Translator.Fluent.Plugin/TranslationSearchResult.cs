@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Blast.Core.Interfaces;
+using Blast.Core.Objects;
 using Blast.Core.Results;
 
 namespace Translator.Fluent.Plugin
@@ -13,6 +14,10 @@ namespace Translator.Fluent.Plugin
         {
             UseIconGlyph = true;
             IconGlyph = iconGlyph;
+            if (!string.IsNullOrWhiteSpace(translation.Transliteration?.Text))
+            {
+                InformationElements = new List<InformationElement> {new("Latin", translation.Transliteration.Text)};
+            }
         }
 
         protected override void OnSelectedSearchResultChanged()

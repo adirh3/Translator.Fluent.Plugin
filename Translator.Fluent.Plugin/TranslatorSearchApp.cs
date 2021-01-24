@@ -126,7 +126,7 @@ namespace Translator.Fluent.Plugin
                 yield break;
 
             // Output languages are defined as parameters, input language detected.
-            string route = $"/translate?api-version=3.0&to={toLanguage}";
+            string route = $"/translate?api-version=3.0&to={toLanguage}&toScript=Latn";
             object[] body = {new {Text = searchedText}};
             string requestBody = JsonSerializer.Serialize(body);
 
