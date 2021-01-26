@@ -164,7 +164,7 @@ namespace Translator.Fluent.Plugin
                     {
                         new()
                         {
-                            Name = translation.To,
+                            Name = searchedTag,
                             Value = searchedTag,
                             IconGlyph = DictionaryIconGlyph
                         }
@@ -175,7 +175,7 @@ namespace Translator.Fluent.Plugin
                     {
                         tags.Add(new()
                         {
-                            Name = detectedLanguage,
+                            Name = languageName,
                             Value = languageName,
                             IconGlyph = DictionaryIconGlyph
                         });
