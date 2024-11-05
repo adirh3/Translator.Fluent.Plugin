@@ -1,13 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0-windows10.0.19041</TargetFramework>
-        <Version>1.3.0.3</Version>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <EnableDynamicLoading>true</EnableDynamicLoading>
+        <Version></Version>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Blast.API" Version="0.9.40.1-beta" />
-        <PackageReference Include="TextCopy" Version="1.5.1" />
+        <PackageReference Include="Blast.API" Version="0.9.92-*">
+            <Private>false</Private>
+            <ExcludeAssets>runtime</ExcludeAssets>
+        </PackageReference>
     </ItemGroup>
 
 </Project>

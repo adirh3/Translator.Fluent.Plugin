@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Translator.Fluent.Plugin
+﻿namespace Translator.Fluent.Plugin
 {
     public class LanguagesResult
     {

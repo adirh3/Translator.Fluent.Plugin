@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Blast.Core.Interfaces;
+﻿using Blast.Core.Interfaces;
 using Blast.Core.Objects;
 using Blast.Core.Results;
 

@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Blast.API.Search;
 using Blast.API.Search.SearchOperations;
 using Blast.Core;
@@ -130,15 +123,13 @@ namespace Translator.Fluent.Plugin
 
             // Output languages are defined as parameters, input language detected.
             string route = $"/translate?api-version=3.0&to={toLanguage}&toScript=Latn";
-            object[] body = {new {Text = searchedText}};
+            object[] body = [new {Text = searchedText}];
             string requestBody = JsonSerializer.Serialize(body);
 
-            using var request = new HttpRequestMessage
-            {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(Endpoint + route),
-                Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
-            };
+            using var request = new HttpRequestMessage();
+            request.Method = HttpMethod.Post;
+            request.RequestUri = new Uri(Endpoint + route);
+            request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
             // Build the request.
             request.Headers.Add("Ocp-Apim-Subscription-Key", SubscriptionKey);
             request.Headers.Add("Ocp-Apim-Subscription-Region", "eastus2");
@@ -211,7 +202,7 @@ namespace Translator.Fluent.Plugin
 
             // Type is TranslateSearchResult
             string textToCopy = searchResult.ResultName;
-            if (searchResult.SelectedOperation == _copyLatinSearchOperation)
+            if (Equals(searchResult.SelectedOperation, _copyLatinSearchOperation))
                 textToCopy = ((TranslationSearchResult) searchResult).LatinTranslationText;
             Clipboard.SetText(textToCopy);
             return new ValueTask<IHandleResult>(new HandleResult(true, false));
